@@ -65,12 +65,17 @@ export const EmployeeManagementSection = () => {
     }
   };
   const deleteUser = (id: string) => {
-      update(
+    const currentUser = store.currentUser
+    if (currentUser.id !== id){
+        update(
         "users",
         store.users.filter((u: User) => u.id !== id),
       );
       toast.info("Usuario removido");
+      return
     };
+    toast.error("Não é permitido remover uśario logado.")
+  }
   
 
   return (
