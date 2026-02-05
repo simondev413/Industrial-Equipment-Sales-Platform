@@ -64,7 +64,7 @@ export const AuthScreen = ({ onClose, onLogin }: AuthScreenProps) => {
       // Adicionamos o optional chaining ?. e um fallback para array vazio []
       const users = store?.users || [];
       const user = users.find(
-        (u: User) => {return u.email === email && u.password === password},
+        (u: User) => u.email === email && u.password === password,
       );
       console.log(user,password,email) 
 
