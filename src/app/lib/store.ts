@@ -1,16 +1,30 @@
 import { toast } from "sonner";
 import { STORAGE_KEY } from "./env";
 import  { useState,useEffect } from 'react'
+
+
 export type UserRole = 'admin' | 'employee' | 'client';
+export type Department = 'sales' | 'stock' | 'management' | null; // Novo
 
 export interface User {
   id: string;
   name: string;
   email: string;
-  role: UserRole;
+  role: 'admin' | 'employee' | 'client';
+  department: Department; // Campo obrigatório para funcionários
   avatar: string;
-  clientId?: string; // Linked if role is 'client'
+  clientId?: string;
+  password: string;
 }
+
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contact: string;
+  category: string;
+}
+
 
 export interface Client {
   id: string;
@@ -83,15 +97,19 @@ export interface Notification {
 
 const initialData = {
   users: [
-    { id: 'u1', name: 'Admin Master', email: 'admin@mega-ar.pt', role: 'admin', avatar: '...' },
-    { id: 'u2', name: 'Técnico Especialista', email: 'tecnico@mega-ar.pt', role: 'employee', avatar: '...' }
+    { id: 'u1', name: 'Admin Master', email: 'admin@mega-ar.pt', role: 'admin', department: 'admin', avatar: '...',password: 'admin123' },
+    { id: 'u2', name: 'João Vendas', email: 'vendas@mega-ar.pt', role: 'employee', department: 'vendas', avatar: '...',password: 'vendas123'} ,
+    { id: 'u3', name: 'Maria Stock', email: 'stock@mega-ar.pt', role: 'employee', department: 'stock', avatar: '...',password: 'stock123'  }
+  ],
+  suppliers: [
+    { id: 's1', name: 'CoolTech Global', contact: 'comercial@cooltech.com', category: 'Chillers' },
+    { id: 's2', name: 'HVAC Parts', contact: 'suporte@hvac.com', category: 'Componentes' }
   ],
   clients: [],
   inquiries: [],
   products: [],
   salesOrders: [],
   purchaseOrders: [],
-  suppliers: [],
   notifications: [],
   currentUser: null
 };

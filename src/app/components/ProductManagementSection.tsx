@@ -1,48 +1,83 @@
-import React, { useState } from 'react';
-import { PlusSquare, Search, Tag, Box, DollarSign, List, Edit2, Trash2 } from 'lucide-react';
-import { useStore, Product } from '@/app/lib/store';
-import { toast } from 'sonner';
+import React, { useState } from "react";
+import {
+  PlusSquare,
+  Search,
+  Tag,
+  Box,
+  DollarSign,
+  List,
+  Edit2,
+  Trash2,
+  Package,
+} from "lucide-react";
+import { useStore, Product } from "@/app/lib/store";
+import { compressImage } from "../lib/utils";
+import { toast } from "sonner";
 
 export const ProductManagementSection = () => {
   const { store, update } = useStore();
   const [showModal, setShowModal] = useState(false);
   const [newProduct, setNewProduct] = useState({
-    name: '',
-    description: '',
+    name: "",
+    description: "",
     price: 0,
-    category: 'Resfriamento',
-    stock: 0
+    category: "Resfriamento",
+    stock: 0,
+    image: "",
   });
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      try {
+        // Comprime para no máximo 800px (ideal para catálogo)
+        const compressedBase64 = await compressImage(file, 800, 800);
+        setImagePreview(compressedBase64);
+        setNewProduct({ ...newProduct, image: compressedBase64 });
+      } catch (error) {
+        toast.error("Erro ao processar imagem.");
+      }
+    }
+  };
 
   const handleAdd = () => {
     if (!newProduct.name || newProduct.price <= 0) {
-      toast.error('Preencha os dados do produto corretamente');
+      toast.error("Preencha os dados do produto corretamente");
       return;
     }
 
     const product: Product = {
       id: `P-${Math.random().toString(36).substr(2, 4).toUpperCase()}`,
-      ...newProduct
+      ...newProduct,
     };
 
-    update('products', [...store.products, product]);
+    update("products", [...store.products, product]);
     setShowModal(false);
-    toast.success('Produto adicionado ao catálogo');
+    toast.success("Produto adicionado ao catálogo");
   };
 
   const deleteProduct = (id: string) => {
-    update('products', store.products.filter((p: Product) => p.id !== id));
-    toast.info('Produto removido');
+    update(
+      "products",
+      store.products.filter((p: Product) => p.id !== id),
+    );
+    toast.info("Produto removido");
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">Gestão de Catálogo</h1>
-          <p className="text-slate-500">Adicione ou edite os equipamentos comercializados pela MEGA-AR.</p>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Gestão de Catálogo
+          </h1>
+          <p className="text-slate-500">
+            Adicione ou edite os equipamentos comercializados pela MEGA-AR.
+          </p>
         </div>
-        <button 
+        <button
           onClick={() => setShowModal(true)}
           className="bg-blue-600 text-white px-5 py-2.5 rounded-xl font-semibold flex items-center gap-2 hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
         >
@@ -67,14 +102,24 @@ export const ProductManagementSection = () => {
               <tr key={p.id} className="hover:bg-slate-50/50 transition-colors">
                 <td className="px-6 py-4">
                   <p className="text-sm font-bold text-slate-900">{p.name}</p>
-                  <p className="text-[10px] text-slate-500 truncate max-w-xs">{p.description}</p>
+                  <p className="text-[10px] text-slate-500 truncate max-w-xs">
+                    {p.description}
+                  </p>
                 </td>
-                <td className="px-6 py-4 text-sm text-slate-600">{p.category}</td>
-                <td className="px-6 py-4 text-sm font-bold text-slate-900">{p.price.toLocaleString()} AO</td>
-                <td className="px-6 py-4 text-sm text-slate-600 font-bold">{p.stock} un.</td>
+                <td className="px-6 py-4 text-sm text-slate-600">
+                  {p.category}
+                </td>
+                <td className="px-6 py-4 text-sm font-bold text-slate-900">
+                  {p.price.toLocaleString()} AO
+                </td>
+                <td className="px-6 py-4 text-sm text-slate-600 font-bold">
+                  {p.stock} un.
+                </td>
                 <td className="px-6 py-4 text-right">
-                  <button className="p-2 text-slate-400 hover:text-blue-600"><Edit2 className="w-4 h-4" /></button>
-                  <button 
+                  <button className="p-2 text-slate-400 hover:text-blue-600">
+                    <Edit2 className="w-4 h-4" />
+                  </button>
+                  <button
                     onClick={() => deleteProduct(p.id)}
                     className="p-2 text-slate-400 hover:text-red-600"
                   >
@@ -90,21 +135,60 @@ export const ProductManagementSection = () => {
       {showModal && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm">
           <div className="bg-white w-full max-w-xl rounded-3xl shadow-2xl p-8">
-            <h2 className="text-xl font-bold text-slate-900 mb-6">Novo Equipamento Industrial</h2>
+            <h2 className="text-xl font-bold text-slate-900 mb-6">
+              Novo Equipamento Industrial
+            </h2>
             <div className="grid grid-cols-2 gap-4">
               <div className="col-span-2">
-                <label className="text-sm font-bold text-slate-700 block mb-2">Nome do Produto</label>
-                <input 
-                  type="text" 
+                <label className="text-sm font-bold text-slate-700 block mb-2">
+                  Nome do Produto
+                </label>
+                <input
+                  type="text"
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, name: e.target.value })
+                  }
                 />
               </div>
+              <div className="col-span-2 space-y-2">
+                <label className="text-sm font-bold text-slate-700">
+                  Foto do Equipamento
+                </label>
+                <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border-2 border-dashed border-slate-200">
+                  <div className="w-24 h-24 bg-white rounded-xl overflow-hidden shadow-inner flex items-center justify-center shrink-0">
+                    {imagePreview ? (
+                      <img
+                        src={imagePreview}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <Package className="w-10 h-10 text-slate-200" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-xs text-slate-500 mb-2">
+                      Resolução recomendada: 800x800px. O sistema irá comprimir
+                      a imagem automaticamente.
+                    </p>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="text-xs text-blue-600 font-bold"
+                    />
+                  </div>
+                </div>
+              </div>
               <div>
-                <label className="text-sm font-bold text-slate-700 block mb-2">Categoria</label>
-                <select 
+                <label className="text-sm font-bold text-slate-700 block mb-2">
+                  Categoria
+                </label>
+                <select
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
+                  onChange={(e) =>
+                    setNewProduct({ ...newProduct, category: e.target.value })
+                  }
                 >
                   <option>Resfriamento</option>
                   <option>Aquecimento</option>
@@ -113,37 +197,58 @@ export const ProductManagementSection = () => {
                 </select>
               </div>
               <div>
-                <label className="text-sm font-bold text-slate-700 block mb-2">Preço ( AO)</label>
-                <input 
-                  type="number" 
+                <label className="text-sm font-bold text-slate-700 block mb-2">
+                  Preço ( AO)
+                </label>
+                <input
+                  type="number"
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  onChange={(e) => setNewProduct({...newProduct, price: parseFloat(e.target.value)})}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      price: parseFloat(e.target.value),
+                    })
+                  }
                 />
               </div>
               <div className="col-span-2">
-                <label className="text-sm font-bold text-slate-700 block mb-2">Descrição Técnica</label>
-                <textarea 
+                <label className="text-sm font-bold text-slate-700 block mb-2">
+                  Descrição Técnica
+                </label>
+                <textarea
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none h-24"
-                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      description: e.target.value,
+                    })
+                  }
                 ></textarea>
               </div>
               <div>
-                <label className="text-sm font-bold text-slate-700 block mb-2">Stock Inicial</label>
-                <input 
-                  type="number" 
+                <label className="text-sm font-bold text-slate-700 block mb-2">
+                  Stock Inicial
+                </label>
+                <input
+                  type="number"
                   className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"
-                  onChange={(e) => setNewProduct({...newProduct, stock: parseInt(e.target.value)})}
+                  onChange={(e) =>
+                    setNewProduct({
+                      ...newProduct,
+                      stock: parseInt(e.target.value),
+                    })
+                  }
                 />
               </div>
             </div>
             <div className="flex gap-4 mt-8">
-              <button 
+              <button
                 onClick={() => setShowModal(false)}
                 className="flex-1 py-3 bg-slate-100 text-slate-600 font-bold rounded-xl hover:bg-slate-200 transition-all"
               >
                 Cancelar
               </button>
-              <button 
+              <button
                 onClick={handleAdd}
                 className="flex-1 py-3 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 transition-all shadow-lg"
               >

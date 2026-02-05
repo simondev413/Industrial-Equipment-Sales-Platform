@@ -8,24 +8,24 @@ export const CatalogSection = () => {
   const isClient = user?.role === 'client';
 
   // Lógica de Filtragem de Negócio
-  const filteredProducts = store.products.filter((product:Product) => {
-  if (!isClient) return true;
+  const filteredProducts = store.products.filter((product: Product) => {
+    if (!isClient) return true;
 
-  // Só mostra se houver um ofício com este PRODUTO ID e status de catálogo enviado ou superior
-  const hasInterestRecord = store.inquiries?.some((iq:Inquiry) => 
-    iq.clientId === user.clientId && 
-    iq.productId === product.id && 
-    ['catalog_sent', 'proposal_sent', 'interested'].includes(iq.status)
-  );
+    // Só mostra se houver um ofício com este PRODUTO ID e status de catálogo enviado ou superior
+    const hasInterestRecord = store.inquiries?.some((iq: Inquiry) =>
+      iq.clientId === user.clientId &&
+      iq.productId === product.id &&
+      ['catalog_sent', 'proposal_sent', 'interested'].includes(iq.status)
+    );
 
-  // Esconde se já houver uma compra (Nota de Aquisição) para este produto
-  const alreadyPurchased = store.salesOrders?.some((order:SalesOrder) => 
-    order.clientId === user.clientId && 
-    order.productId === product.id
-  );
+    // Esconde se já houver uma compra (Nota de Aquisição) para este produto
+    const alreadyPurchased = store.salesOrders?.some((order: SalesOrder) =>
+      order.clientId === user.clientId &&
+      order.productId === product.id
+    );
 
-  return hasInterestRecord && !alreadyPurchased;
-});
+    return hasInterestRecord && !alreadyPurchased;
+  });
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-end">
@@ -34,8 +34,8 @@ export const CatalogSection = () => {
             {isClient ? 'O Meu Catálogo Técnico' : 'Catálogo Geral de Equipamentos'}
           </h1>
           <p className="text-slate-500">
-            {isClient 
-              ? 'Equipamentos com propostas ativas e documentação técnica disponível.' 
+            {isClient
+              ? 'Equipamentos com propostas ativas e documentação técnica disponível.'
               : 'Visualização técnica e comercial dos produtos MEGA-AR.'}
           </p>
         </div>
@@ -55,7 +55,7 @@ export const CatalogSection = () => {
           </div>
           <h3 className="text-lg font-bold text-slate-900 mb-2">Nenhum catálogo disponível</h3>
           <p className="text-slate-500 max-w-md mx-auto mb-6">
-            Para visualizar detalhes técnicos e preços de equipamentos, deve primeiro abrir um <b>Ofício</b>. 
+            Para visualizar detalhes técnicos e preços de equipamentos, deve primeiro abrir um <b>Ofício</b>.
             Assim que um técnico validar o pedido, o catálogo aparecerá aqui.
           </p>
         </div>
@@ -71,26 +71,31 @@ export const CatalogSection = () => {
                 {product.category}
               </div>
             </div>
-            
+
             <div className="p-6 flex-1 flex flex-col">
+              {product.image ? (
+              <img src={product.image} alt={product.name} className="w-full h-full object-cover transition-transform group-hover:scale-110" />
+              ) : (
+              <BookOpen className="w-16 h-16 text-slate-300" />
+  )}
               <h3 className="text-lg font-bold text-slate-900 mb-2">{product.name}</h3>
               <p className="text-sm text-slate-500 mb-6 flex-1 leading-relaxed">
                 {product.description}
               </p>
-              
+
               <div className="flex items-center justify-between pt-6 border-t border-slate-50">
                 <div>
                   <p className="text-[10px] font-bold text-slate-400 uppercase">Preço Unidade</p>
                   <p className="text-xl font-black text-blue-600">{product.price.toLocaleString()} AO</p>
                 </div>
                 <div className="flex gap-2">
-                  <button 
+                  <button
                     title="Descarregar Ficha Técnica"
                     className="p-2.5 bg-slate-50 text-slate-600 rounded-xl hover:bg-slate-100 transition-all"
                   >
                     <Download className="w-5 h-5" />
                   </button>
-                  <button 
+                  <button
                     title="Ver Detalhes Avançados"
                     className="p-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
                   >
@@ -98,7 +103,7 @@ export const CatalogSection = () => {
                   </button>
                 </div>
               </div>
-              
+
               {isClient && (
                 <div className="mt-4 flex items-center gap-2 text-[10px] text-green-600 font-bold bg-green-50 p-2 rounded-lg">
                   <Info className="w-3 h-3" />

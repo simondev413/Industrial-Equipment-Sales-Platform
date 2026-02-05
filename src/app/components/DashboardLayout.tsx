@@ -14,7 +14,9 @@ import {
   User as UserIcon,
   ShieldCheck,
   PlusSquare,
-  ClipboardList
+  ClipboardList,
+  icons,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { DashboardOverview } from '@/app/components/DashboardOverview';
@@ -29,6 +31,7 @@ import { ProductManagementSection } from '@/app/components/ProductManagementSect
 import { EmployeeManagementSection } from '@/app/components/EmployeeManagementSection';
 import { NotificationCenter } from '@/app/components/NotificationCenter';
 import { useStore } from '@/app/lib/store';
+import { SuppliersSection } from './SuppliersSection';
 
 interface DashboardLayoutProps {
   user: any;
@@ -44,19 +47,31 @@ export const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
   const isEmployee = user?.role === 'employee';
   const isClient = user?.role === 'client';
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'employee', 'client'] },
-    { id: 'inquiries', label: isClient ? 'Meus Ofícios' : 'Gestão de Ofícios', icon: FileText, roles: ['admin', 'employee', 'client'] },
-    { id: 'clients', label: 'Clientes', icon: Users, roles: ['admin', 'employee'] },
-    { id: 'sales', label: isClient ? 'Minhas Compras' : 'Vendas (Aquisição)', icon: ShoppingCart, roles: ['admin', 'employee', 'client'] },
-    { id: 'inventory', label: 'Stock / Armazém', icon: Package, roles: ['admin', 'employee'] },
-    { id: 'purchase', label: 'Encomendas Fornecedor', icon: Truck, roles: ['admin', 'employee'] },
-    { id: 'catalog', label: 'Catálogo Industrial', icon: BookOpen, roles: ['admin', 'employee', 'client'] },
-    { id: 'products', label: 'Gerir Produtos', icon: PlusSquare, roles: ['admin', 'employee'] },
-    { id: 'employees', label: 'Gestão de Equipa', icon: ShieldCheck, roles: ['admin'] },
-  ];
+const menuItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['admin', 'employee', 'client'], depts: ['vendas', 'stock', 'admin'] },
+  { id: 'inquiries', label: 'Ofícios', icon: FileText, roles: ['admin', 'employee', 'client'], depts: ['vendas', 'admin'] },
+  { id: 'clients', label: 'Clientes', icon: Users, roles: ['admin', 'employee'], depts: ['vendas', 'admin'] },
+  { id: 'sales', label: 'Vendas', icon: ShoppingCart, roles: ['admin', 'employee', 'client'], depts: ['vendas', 'admin'] },
+  { id: 'inventory', label: 'Stock / Armazém', icon: Package, roles: ['admin', 'employee'], depts: ['stock', 'admin'] },
+  { id: 'purchase', label: 'Encomendas Fornecedor', icon: Truck, roles: ['admin', 'employee'], depts: ['stock', 'admin'] },
+  { id: 'catalog', label: 'Catálogo', icon: BookOpen, roles: ['admin', 'employee', 'client'], depts: ['vendas', 'stock', 'admin'] },
+  { id: 'products', label: 'Gerir Produtos', icon: PlusSquare, roles: ['admin', 'employee'], depts: ['stock', 'admin'] },
+  { id: 'employees', label: 'Gestão de Equipa', icon: ShieldCheck, roles: ['admin'], depts: ['admin'] },
+  { id:'suppliers',label:'Fornecedores',icon:Briefcase,roles:['admin','employee'],depts:['admin','stock']}
+];
 
-  const filteredMenuItems = menuItems.filter(item => item.roles.includes(user?.role));
+// Filtro robusto 
+const filteredMenuItems = menuItems.filter(item => {
+  const hasRole = item.roles.includes(user?.role);
+  
+  // Se for cliente ou admin, a lógica de departamento é simplificada
+  if (user?.role === 'client') return hasRole;
+  if (user?.role === 'admin') return hasRole;
+
+  // Para funcionários (employee), verifica se o departamento dele tem permissão para o item
+  const hasDept = user?.department && item.depts.includes(user.department);
+  return hasRole && hasDept;
+});
 
   const renderContent = () => {
     switch (activeTab) {
@@ -68,6 +83,7 @@ export const DashboardLayout = ({ user, onLogout }: DashboardLayoutProps) => {
       case 'purchase': return <PurchaseOrdersSection />;
       case 'catalog': return <CatalogSection />;
       case 'products': return <ProductManagementSection />;
+      case 'suppliers':return <SuppliersSection />
       case 'employees': return <EmployeeManagementSection />;
       case 'profile': return <ProfileSection user={user} />;
       default: return <DashboardOverview role={user?.role} />;
