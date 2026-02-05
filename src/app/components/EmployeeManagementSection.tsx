@@ -64,7 +64,14 @@ export const EmployeeManagementSection = () => {
       }
     }
   };
-
+  const deleteUser = (id: string) => {
+      update(
+        "users",
+        store.users.filter((u: User) => u.id !== id),
+      );
+      toast.info("Usuario removido");
+    };
+  
 
   return (
     <div className="space-y-6">
@@ -132,7 +139,7 @@ export const EmployeeManagementSection = () => {
                   <button className="p-2 text-slate-400 hover:text-blue-600">
                     <Edit2 className="w-4 h-4" />
                   </button>
-                  <button className="p-2 text-slate-400 hover:text-red-600">
+                  <button  onClick={() => {deleteUser(emp.id)}} className="p-2 text-slate-400 hover:text-red-600">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 </td>
